@@ -37,14 +37,14 @@ class Main extends hxd.App {
 
     static function onSpaceJump(event : hxd.Event) {
         switch(event.kind) {
-            case EKeyDown:
-                if(event.keyCode == Key.SPACE) {
-                    trace("hhh");
+            case EKeyDown | EPush:
+                if(event.kind == EKeyDown && event.keyCode == Key.SPACE || event.kind==EPush) {
                     if(player.inAir)
                          return;
          
                     player.inAir = true;
-                    player.velocity = -60;
+                    player.velocity = -80;
+                    player.do_jump();
                 }
             case _:
         }
@@ -139,11 +139,12 @@ class Main extends hxd.App {
             return;
 
         player.y += player.velocity * dt;
-        player.velocity += 98*dt;
+        player.velocity += 160*dt;
         if(player.y>=105) {
             player.y = 105;
             player.inAir = false;
             player.velocity = 0;
+            player.do_run();
         }
     }
 
