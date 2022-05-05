@@ -1,5 +1,7 @@
 package;
 
+import hxd.Key;
+import hxd.Window;
 import h2d.Bitmap;
 import h2d.Layers;
 import hxd.App;
@@ -12,6 +14,8 @@ class Main extends hxd.App {
 
 	static var layers:Layers;
 
+    static var player:Player;
+
 	override function init() {
 		super.init();
 		s2d.scaleMode = ScaleMode.LetterBox(240, 135);
@@ -23,11 +27,28 @@ class Main extends hxd.App {
 		];
 		layers = new Layers(s2d);
 		init_background();
-		var player = new Player();
+
+        Window.getInstance().addEventTarget(onSpaceJump);
+		player = new Player();
 		player.x = 28;
 		player.y = 105;
 		layers.add(player, 3);
 	}
+
+    static function onSpaceJump(event : hxd.Event) {
+        switch(event.kind) {
+            case EKeyDown:
+                if(event.keyCode == Key.SPACE) {
+                    trace("hhh");
+                    if(player.inAir)
+                         return;
+         
+                    player.inAir = true;
+                    player.velocity = -60;
+                }
+            case _:
+        }
+    }
 
 	static var fg_1_1:Bitmap;
 	static var fg_1_2:Bitmap;
@@ -113,11 +134,25 @@ class Main extends hxd.App {
 			bg_2_2.x += 480;
 	}
 
+    static function update_player_jump(dt:Float) {
+        if(!player.inAir)
+            return;
+
+        player.y += player.velocity * dt;
+        player.velocity += 98*dt;
+        if(player.y>=105) {
+            player.y = 105;
+            player.inAir = false;
+            player.velocity = 0;
+        }
+    }
+
 	override function update(dt:Float) {
 		update_parallex_fg_1(dt);
 		update_parallex_fg_2(dt);
 		update_parallex_bg_1(dt);
 		update_parallex_bg_2(dt);
+        update_player_jump(dt);
 	}
 
 	static function main() {
