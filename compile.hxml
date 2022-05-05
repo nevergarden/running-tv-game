@@ -3,3 +3,4 @@
 -lib hlsdl
 -hl running-tv-game.hl
 -main Main
+-D windowSize=240x135
