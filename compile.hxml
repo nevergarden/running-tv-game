@@ -4,3 +4,10 @@
 -hl running-tv-game.hl
 -main Main
 -D windowSize=240x135
+
+--next
+-cp src
+-lib heaps
+-js docs/game.js
+-main Main
+-D windowSize=240x135
