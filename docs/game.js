@@ -29,433 +29,6 @@ EReg.prototype = {
 	}
 	,__class__: EReg
 };
-var HxOverrides = function() { };
-$hxClasses["HxOverrides"] = HxOverrides;
-HxOverrides.__name__ = "HxOverrides";
-HxOverrides.strDate = function(s) {
-	switch(s.length) {
-	case 8:
-		var k = s.split(":");
-		var d = new Date();
-		d["setTime"](0);
-		d["setUTCHours"](k[0]);
-		d["setUTCMinutes"](k[1]);
-		d["setUTCSeconds"](k[2]);
-		return d;
-	case 10:
-		var k = s.split("-");
-		return new Date(k[0],k[1] - 1,k[2],0,0,0);
-	case 19:
-		var k = s.split(" ");
-		var y = k[0].split("-");
-		var t = k[1].split(":");
-		return new Date(y[0],y[1] - 1,y[2],t[0],t[1],t[2]);
-	default:
-		throw haxe_Exception.thrown("Invalid date format : " + s);
-	}
-};
-HxOverrides.cca = function(s,index) {
-	var x = s.charCodeAt(index);
-	if(x != x) {
-		return undefined;
-	}
-	return x;
-};
-HxOverrides.substr = function(s,pos,len) {
-	if(len == null) {
-		len = s.length;
-	} else if(len < 0) {
-		if(pos == 0) {
-			len = s.length + len;
-		} else {
-			return "";
-		}
-	}
-	return s.substr(pos,len);
-};
-HxOverrides.remove = function(a,obj) {
-	var i = a.indexOf(obj);
-	if(i == -1) {
-		return false;
-	}
-	a.splice(i,1);
-	return true;
-};
-HxOverrides.now = function() {
-	return Date.now();
-};
-var Lambda = function() { };
-$hxClasses["Lambda"] = Lambda;
-Lambda.__name__ = "Lambda";
-Lambda.array = function(it) {
-	var a = [];
-	var i = $getIterator(it);
-	while(i.hasNext()) {
-		var i1 = i.next();
-		a.push(i1);
-	}
-	return a;
-};
-var h3d_IDrawable = function() { };
-$hxClasses["h3d.IDrawable"] = h3d_IDrawable;
-h3d_IDrawable.__name__ = "h3d.IDrawable";
-h3d_IDrawable.__isInterface__ = true;
-h3d_IDrawable.prototype = {
-	__class__: h3d_IDrawable
-};
-var hxd_App = function() {
-	var _gthis = this;
-	var engine = h3d_Engine.CURRENT;
-	if(engine != null) {
-		this.engine = engine;
-		engine.onReady = $bind(this,this.setup);
-		haxe_Timer.delay($bind(this,this.setup),0);
-	} else {
-		hxd_System.start(function() {
-			engine = new h3d_Engine();
-			_gthis.engine = engine;
-			engine.onReady = $bind(_gthis,_gthis.setup);
-			engine.init();
-		});
-	}
-};
-$hxClasses["hxd.App"] = hxd_App;
-hxd_App.__name__ = "hxd.App";
-hxd_App.__interfaces__ = [h3d_IDrawable];
-hxd_App.staticHandler = function() {
-};
-hxd_App.prototype = {
-	onResize: function() {
-	}
-	,setScene: function(scene,disposePrevious) {
-		if(disposePrevious == null) {
-			disposePrevious = true;
-		}
-		var new2D = ((scene) instanceof h2d_Scene) ? scene : null;
-		var new3D = ((scene) instanceof h3d_scene_Scene) ? scene : null;
-		if(new2D != null) {
-			this.sevents.removeScene(this.s2d);
-			this.sevents.addScene(scene,0);
-		} else {
-			if(new3D != null) {
-				this.sevents.removeScene(this.s3d);
-			}
-			this.sevents.addScene(scene);
-		}
-		if(disposePrevious) {
-			if(new2D != null) {
-				this.s2d.dispose();
-			} else if(new3D != null) {
-				this.s3d.dispose();
-			} else {
-				throw haxe_Exception.thrown("Can't dispose previous scene");
-			}
-		}
-		if(new2D != null) {
-			this.s2d = new2D;
-		}
-		if(new3D != null) {
-			this.s3d = new3D;
-		}
-	}
-	,setCurrent: function() {
-		var _gthis = this;
-		this.engine = h3d_Engine.CURRENT;
-		this.isDisposed = false;
-		this.engine.onReady = hxd_App.staticHandler;
-		this.engine.onResized = function() {
-			if(_gthis.s2d == null) {
-				return;
-			}
-			_gthis.s2d.checkResize();
-			_gthis.onResize();
-		};
-		hxd_System.setLoop($bind(this,this.mainLoop));
-	}
-	,setScene2D: function(s2d,disposePrevious) {
-		if(disposePrevious == null) {
-			disposePrevious = true;
-		}
-		this.sevents.removeScene(this.s2d);
-		this.sevents.addScene(s2d,0);
-		if(disposePrevious) {
-			this.s2d.dispose();
-		}
-		this.s2d = s2d;
-	}
-	,setScene3D: function(s3d,disposePrevious) {
-		if(disposePrevious == null) {
-			disposePrevious = true;
-		}
-		this.sevents.removeScene(this.s3d);
-		this.sevents.addScene(s3d);
-		if(disposePrevious) {
-			this.s3d.dispose();
-		}
-		this.s3d = s3d;
-	}
-	,render: function(e) {
-		this.s3d.render(e);
-		this.s2d.render(e);
-	}
-	,setup: function() {
-		var _gthis = this;
-		var initDone = false;
-		this.engine.onReady = hxd_App.staticHandler;
-		this.engine.onResized = function() {
-			if(_gthis.s2d == null) {
-				return;
-			}
-			_gthis.s2d.checkResize();
-			if(initDone) {
-				_gthis.onResize();
-			}
-		};
-		this.s3d = new h3d_scene_Scene();
-		this.s2d = new h2d_Scene();
-		this.sevents = new hxd_SceneEvents();
-		this.sevents.addScene(this.s2d);
-		this.sevents.addScene(this.s3d);
-		this.loadAssets(function() {
-			initDone = true;
-			_gthis.init();
-			hxd_Timer.skip();
-			_gthis.mainLoop();
-			hxd_System.setLoop($bind(_gthis,_gthis.mainLoop));
-			hxd_Key.initialize();
-		});
-	}
-	,dispose: function() {
-		this.engine.onResized = hxd_App.staticHandler;
-		this.engine.onContextLost = hxd_App.staticHandler;
-		this.isDisposed = true;
-		if(this.s2d != null) {
-			this.s2d.dispose();
-		}
-		if(this.s3d != null) {
-			this.s3d.dispose();
-		}
-		if(this.sevents != null) {
-			this.sevents.dispose();
-		}
-	}
-	,loadAssets: function(onLoaded) {
-		onLoaded();
-	}
-	,init: function() {
-	}
-	,mainLoop: function() {
-		hxd_Timer.update();
-		this.sevents.checkEvents();
-		if(this.isDisposed) {
-			return;
-		}
-		this.update(hxd_Timer.dt);
-		if(this.isDisposed) {
-			return;
-		}
-		var dt = hxd_Timer.dt;
-		if(this.s2d != null) {
-			this.s2d.setElapsedTime(dt);
-		}
-		if(this.s3d != null) {
-			this.s3d.setElapsedTime(dt);
-		}
-		this.engine.render(this);
-	}
-	,update: function(dt) {
-	}
-	,__class__: hxd_App
-};
-var Main = function() {
-	hxd_App.call(this);
-};
-$hxClasses["Main"] = Main;
-Main.__name__ = "Main";
-Main.onSpaceJump = function(event) {
-	switch(event.kind._hx_index) {
-	case 0:case 8:
-		if(event.kind == hxd_EventKind.EKeyDown && event.keyCode == 32 || event.kind == hxd_EventKind.EPush) {
-			if(Main.player.inAir) {
-				return;
-			}
-			Main.player.inAir = true;
-			Main.player.velocity = -80;
-			Main.player.do_jump();
-		}
-		break;
-	default:
-	}
-};
-Main.init_background = function() {
-	var this1 = hxd_Res.get_loader();
-	Main.fg_1_1 = new h2d_Bitmap(this1.loadCache("bg/fg1.png",hxd_res_Image).toTile());
-	var this1 = hxd_Res.get_loader();
-	Main.fg_1_2 = new h2d_Bitmap(this1.loadCache("bg/fg1.png",hxd_res_Image).toTile());
-	var _this = Main.fg_1_2;
-	_this.posChanged = true;
-	_this.x = 240;
-	Main.layers.addChildAt(Main.fg_1_1,4);
-	Main.layers.addChildAt(Main.fg_1_2,4);
-	var this1 = hxd_Res.get_loader();
-	Main.fg_2_1 = new h2d_Bitmap(this1.loadCache("bg/fg2.png",hxd_res_Image).toTile());
-	var this1 = hxd_Res.get_loader();
-	Main.fg_2_2 = new h2d_Bitmap(this1.loadCache("bg/fg2.png",hxd_res_Image).toTile());
-	var _this = Main.fg_2_2;
-	_this.posChanged = true;
-	_this.x = 240;
-	Main.layers.addChildAt(Main.fg_2_1,2);
-	Main.layers.addChildAt(Main.fg_2_2,2);
-	var _this = Main.layers;
-	var this1 = hxd_Res.get_loader();
-	_this.addChildAt(new h2d_Bitmap(this1.loadCache("bg/sky.png",hxd_res_Image).toTile()),0);
-	var this1 = hxd_Res.get_loader();
-	Main.bg_1_1 = new h2d_Bitmap(this1.loadCache("bg/bg1.png",hxd_res_Image).toTile());
-	var this1 = hxd_Res.get_loader();
-	Main.bg_1_2 = new h2d_Bitmap(this1.loadCache("bg/bg1.png",hxd_res_Image).toTile());
-	var _this = Main.bg_1_2;
-	_this.posChanged = true;
-	_this.x = 240;
-	Main.layers.addChildAt(Main.bg_1_1,0);
-	Main.layers.addChildAt(Main.bg_1_2,0);
-	var this1 = hxd_Res.get_loader();
-	Main.bg_2_1 = new h2d_Bitmap(this1.loadCache("bg/bg2.png",hxd_res_Image).toTile());
-	var this1 = hxd_Res.get_loader();
-	Main.bg_2_2 = new h2d_Bitmap(this1.loadCache("bg/bg2.png",hxd_res_Image).toTile());
-	var _this = Main.bg_2_2;
-	_this.posChanged = true;
-	_this.x = 240;
-	Main.layers.addChildAt(Main.bg_2_1,1);
-	Main.layers.addChildAt(Main.bg_2_2,1);
-};
-Main.update_parallex_fg_1 = function(dt) {
-	var fh = Main.fg_1_1;
-	fh.posChanged = true;
-	fh.x -= dt * Main.fg_1_speed;
-	var fh = Main.fg_1_2;
-	fh.posChanged = true;
-	fh.x -= dt * Main.fg_1_speed;
-	if(Main.fg_1_1.x <= -240) {
-		var fh = Main.fg_1_1;
-		fh.posChanged = true;
-		fh.x += 480;
-	}
-	if(Main.fg_1_2.x <= -240) {
-		var fh = Main.fg_1_2;
-		fh.posChanged = true;
-		fh.x += 480;
-	}
-};
-Main.update_parallex_fg_2 = function(dt) {
-	var fh = Main.fg_2_1;
-	fh.posChanged = true;
-	fh.x -= dt * Main.fg_2_speed;
-	var fh = Main.fg_2_2;
-	fh.posChanged = true;
-	fh.x -= dt * Main.fg_2_speed;
-	if(Main.fg_2_1.x <= -240) {
-		var fh = Main.fg_2_1;
-		fh.posChanged = true;
-		fh.x += 480;
-	}
-	if(Main.fg_2_2.x <= -240) {
-		var fh = Main.fg_2_2;
-		fh.posChanged = true;
-		fh.x += 480;
-	}
-};
-Main.update_parallex_bg_1 = function(dt) {
-	var fh = Main.bg_1_1;
-	fh.posChanged = true;
-	fh.x -= dt * Main.bg_1_speed;
-	var fh = Main.bg_1_2;
-	fh.posChanged = true;
-	fh.x -= dt * Main.bg_1_speed;
-	if(Main.bg_1_1.x <= -240) {
-		var fh = Main.bg_1_1;
-		fh.posChanged = true;
-		fh.x += 480;
-	}
-	if(Main.bg_1_2.x <= -240) {
-		var fh = Main.bg_1_2;
-		fh.posChanged = true;
-		fh.x += 480;
-	}
-};
-Main.update_parallex_bg_2 = function(dt) {
-	var fh = Main.bg_2_1;
-	fh.posChanged = true;
-	fh.x -= dt * Main.bg_2_speed;
-	var fh = Main.bg_2_2;
-	fh.posChanged = true;
-	fh.x -= dt * Main.bg_2_speed;
-	if(Main.bg_2_1.x <= -240) {
-		var fh = Main.bg_2_1;
-		fh.posChanged = true;
-		fh.x += 480;
-	}
-	if(Main.bg_2_2.x <= -240) {
-		var fh = Main.bg_2_2;
-		fh.posChanged = true;
-		fh.x += 480;
-	}
-};
-Main.update_player_jump = function(dt) {
-	if(!Main.player.inAir) {
-		return;
-	}
-	var fh = Main.player;
-	fh.posChanged = true;
-	fh.y += Main.player.velocity * dt;
-	Main.player.velocity += 160 * dt;
-	if(Main.player.y >= 105) {
-		var _this = Main.player;
-		_this.posChanged = true;
-		_this.y = 105;
-		Main.player.inAir = false;
-		Main.player.velocity = 0;
-		Main.player.do_run();
-	}
-};
-Main.main = function() {
-	hxd_Res.set_loader(new hxd_res_Loader(new hxd_fs_EmbedFileSystem(haxe_Unserializer.run("oy2:tvoy7:et4.pngty7:rtj.pngty7:rt3.pngty7:et3.pngty7:rt4.pngty7:et2.pngty7:rt2.pngty7:rt1.pngty7:et1.pngtgy2:bgoy7:fg1.pngty7:bg2.pngty7:bg1.pngty7:fg2.pngty7:sky.pngtgg"))));
-	new Main();
-};
-Main.__super__ = hxd_App;
-Main.prototype = $extend(hxd_App.prototype,{
-	init: function() {
-		hxd_App.prototype.init.call(this);
-		this.s2d.set_scaleMode(h2d_ScaleMode.LetterBox(240,135));
-		var this1 = hxd_Res.get_loader();
-		var tmp = this1.loadCache("tv/rt1.png",hxd_res_Image).toTile();
-		var this1 = hxd_Res.get_loader();
-		var tmp1 = this1.loadCache("tv/rt2.png",hxd_res_Image).toTile();
-		var this1 = hxd_Res.get_loader();
-		var tmp2 = this1.loadCache("tv/rt3.png",hxd_res_Image).toTile();
-		var this1 = hxd_Res.get_loader();
-		Player.run = [tmp,tmp1,tmp2,this1.loadCache("tv/rt4.png",hxd_res_Image).toTile()];
-		Main.layers = new h2d_Layers(this.s2d);
-		Main.init_background();
-		hxd_Window.getInstance().addEventTarget(Main.onSpaceJump);
-		Main.player = new Player();
-		var _this = Main.player;
-		_this.posChanged = true;
-		_this.x = 28;
-		var _this = Main.player;
-		_this.posChanged = true;
-		_this.y = 105;
-		Main.layers.addChildAt(Main.player,3);
-	}
-	,update: function(dt) {
-		Main.update_parallex_fg_1(dt);
-		Main.update_parallex_fg_2(dt);
-		Main.update_parallex_bg_1(dt);
-		Main.update_parallex_bg_2(dt);
-		Main.update_player_jump(dt);
-	}
-	,__class__: Main
-});
-Math.__name__ = "Math";
 var h2d_Object = function(parent) {
 	this.blendMode = h2d_BlendMode.Alpha;
 	this.alpha = 1.;
@@ -1635,6 +1208,491 @@ h2d_Object.prototype = {
 	}
 	,__class__: h2d_Object
 };
+var Enemy = function(parent) {
+	h2d_Object.call(this,parent);
+	this.runAnimation = new h2d_Anim(Enemy.run,12);
+	this.do_run();
+};
+$hxClasses["Enemy"] = Enemy;
+Enemy.__name__ = "Enemy";
+Enemy.__super__ = h2d_Object;
+Enemy.prototype = $extend(h2d_Object.prototype,{
+	do_run: function() {
+		this.removeChildren();
+		this.addChild(this.runAnimation);
+	}
+	,__class__: Enemy
+});
+var HxOverrides = function() { };
+$hxClasses["HxOverrides"] = HxOverrides;
+HxOverrides.__name__ = "HxOverrides";
+HxOverrides.strDate = function(s) {
+	switch(s.length) {
+	case 8:
+		var k = s.split(":");
+		var d = new Date();
+		d["setTime"](0);
+		d["setUTCHours"](k[0]);
+		d["setUTCMinutes"](k[1]);
+		d["setUTCSeconds"](k[2]);
+		return d;
+	case 10:
+		var k = s.split("-");
+		return new Date(k[0],k[1] - 1,k[2],0,0,0);
+	case 19:
+		var k = s.split(" ");
+		var y = k[0].split("-");
+		var t = k[1].split(":");
+		return new Date(y[0],y[1] - 1,y[2],t[0],t[1],t[2]);
+	default:
+		throw haxe_Exception.thrown("Invalid date format : " + s);
+	}
+};
+HxOverrides.cca = function(s,index) {
+	var x = s.charCodeAt(index);
+	if(x != x) {
+		return undefined;
+	}
+	return x;
+};
+HxOverrides.substr = function(s,pos,len) {
+	if(len == null) {
+		len = s.length;
+	} else if(len < 0) {
+		if(pos == 0) {
+			len = s.length + len;
+		} else {
+			return "";
+		}
+	}
+	return s.substr(pos,len);
+};
+HxOverrides.remove = function(a,obj) {
+	var i = a.indexOf(obj);
+	if(i == -1) {
+		return false;
+	}
+	a.splice(i,1);
+	return true;
+};
+HxOverrides.now = function() {
+	return Date.now();
+};
+var Lambda = function() { };
+$hxClasses["Lambda"] = Lambda;
+Lambda.__name__ = "Lambda";
+Lambda.array = function(it) {
+	var a = [];
+	var i = $getIterator(it);
+	while(i.hasNext()) {
+		var i1 = i.next();
+		a.push(i1);
+	}
+	return a;
+};
+var h3d_IDrawable = function() { };
+$hxClasses["h3d.IDrawable"] = h3d_IDrawable;
+h3d_IDrawable.__name__ = "h3d.IDrawable";
+h3d_IDrawable.__isInterface__ = true;
+h3d_IDrawable.prototype = {
+	__class__: h3d_IDrawable
+};
+var hxd_App = function() {
+	var _gthis = this;
+	var engine = h3d_Engine.CURRENT;
+	if(engine != null) {
+		this.engine = engine;
+		engine.onReady = $bind(this,this.setup);
+		haxe_Timer.delay($bind(this,this.setup),0);
+	} else {
+		hxd_System.start(function() {
+			engine = new h3d_Engine();
+			_gthis.engine = engine;
+			engine.onReady = $bind(_gthis,_gthis.setup);
+			engine.init();
+		});
+	}
+};
+$hxClasses["hxd.App"] = hxd_App;
+hxd_App.__name__ = "hxd.App";
+hxd_App.__interfaces__ = [h3d_IDrawable];
+hxd_App.staticHandler = function() {
+};
+hxd_App.prototype = {
+	onResize: function() {
+	}
+	,setScene: function(scene,disposePrevious) {
+		if(disposePrevious == null) {
+			disposePrevious = true;
+		}
+		var new2D = ((scene) instanceof h2d_Scene) ? scene : null;
+		var new3D = ((scene) instanceof h3d_scene_Scene) ? scene : null;
+		if(new2D != null) {
+			this.sevents.removeScene(this.s2d);
+			this.sevents.addScene(scene,0);
+		} else {
+			if(new3D != null) {
+				this.sevents.removeScene(this.s3d);
+			}
+			this.sevents.addScene(scene);
+		}
+		if(disposePrevious) {
+			if(new2D != null) {
+				this.s2d.dispose();
+			} else if(new3D != null) {
+				this.s3d.dispose();
+			} else {
+				throw haxe_Exception.thrown("Can't dispose previous scene");
+			}
+		}
+		if(new2D != null) {
+			this.s2d = new2D;
+		}
+		if(new3D != null) {
+			this.s3d = new3D;
+		}
+	}
+	,setCurrent: function() {
+		var _gthis = this;
+		this.engine = h3d_Engine.CURRENT;
+		this.isDisposed = false;
+		this.engine.onReady = hxd_App.staticHandler;
+		this.engine.onResized = function() {
+			if(_gthis.s2d == null) {
+				return;
+			}
+			_gthis.s2d.checkResize();
+			_gthis.onResize();
+		};
+		hxd_System.setLoop($bind(this,this.mainLoop));
+	}
+	,setScene2D: function(s2d,disposePrevious) {
+		if(disposePrevious == null) {
+			disposePrevious = true;
+		}
+		this.sevents.removeScene(this.s2d);
+		this.sevents.addScene(s2d,0);
+		if(disposePrevious) {
+			this.s2d.dispose();
+		}
+		this.s2d = s2d;
+	}
+	,setScene3D: function(s3d,disposePrevious) {
+		if(disposePrevious == null) {
+			disposePrevious = true;
+		}
+		this.sevents.removeScene(this.s3d);
+		this.sevents.addScene(s3d);
+		if(disposePrevious) {
+			this.s3d.dispose();
+		}
+		this.s3d = s3d;
+	}
+	,render: function(e) {
+		this.s3d.render(e);
+		this.s2d.render(e);
+	}
+	,setup: function() {
+		var _gthis = this;
+		var initDone = false;
+		this.engine.onReady = hxd_App.staticHandler;
+		this.engine.onResized = function() {
+			if(_gthis.s2d == null) {
+				return;
+			}
+			_gthis.s2d.checkResize();
+			if(initDone) {
+				_gthis.onResize();
+			}
+		};
+		this.s3d = new h3d_scene_Scene();
+		this.s2d = new h2d_Scene();
+		this.sevents = new hxd_SceneEvents();
+		this.sevents.addScene(this.s2d);
+		this.sevents.addScene(this.s3d);
+		this.loadAssets(function() {
+			initDone = true;
+			_gthis.init();
+			hxd_Timer.skip();
+			_gthis.mainLoop();
+			hxd_System.setLoop($bind(_gthis,_gthis.mainLoop));
+			hxd_Key.initialize();
+		});
+	}
+	,dispose: function() {
+		this.engine.onResized = hxd_App.staticHandler;
+		this.engine.onContextLost = hxd_App.staticHandler;
+		this.isDisposed = true;
+		if(this.s2d != null) {
+			this.s2d.dispose();
+		}
+		if(this.s3d != null) {
+			this.s3d.dispose();
+		}
+		if(this.sevents != null) {
+			this.sevents.dispose();
+		}
+	}
+	,loadAssets: function(onLoaded) {
+		onLoaded();
+	}
+	,init: function() {
+	}
+	,mainLoop: function() {
+		hxd_Timer.update();
+		this.sevents.checkEvents();
+		if(this.isDisposed) {
+			return;
+		}
+		this.update(hxd_Timer.dt);
+		if(this.isDisposed) {
+			return;
+		}
+		var dt = hxd_Timer.dt;
+		if(this.s2d != null) {
+			this.s2d.setElapsedTime(dt);
+		}
+		if(this.s3d != null) {
+			this.s3d.setElapsedTime(dt);
+		}
+		this.engine.render(this);
+	}
+	,update: function(dt) {
+	}
+	,__class__: hxd_App
+};
+var Main = function() {
+	hxd_App.call(this);
+};
+$hxClasses["Main"] = Main;
+Main.__name__ = "Main";
+Main.onSpaceJump = function(event) {
+	switch(event.kind._hx_index) {
+	case 0:case 8:
+		if(event.kind == hxd_EventKind.EKeyDown && event.keyCode == 32 || event.kind == hxd_EventKind.EPush) {
+			if(Main.player.inAir) {
+				return;
+			}
+			Main.player.inAir = true;
+			Main.player.velocity = -80;
+			Main.player.do_jump();
+		}
+		break;
+	default:
+	}
+};
+Main.init_background = function() {
+	var this1 = hxd_Res.get_loader();
+	Main.fg_1_1 = new h2d_Bitmap(this1.loadCache("bg/fg1.png",hxd_res_Image).toTile());
+	var this1 = hxd_Res.get_loader();
+	Main.fg_1_2 = new h2d_Bitmap(this1.loadCache("bg/fg1.png",hxd_res_Image).toTile());
+	var _this = Main.fg_1_2;
+	_this.posChanged = true;
+	_this.x = 240;
+	Main.layers.addChildAt(Main.fg_1_1,4);
+	Main.layers.addChildAt(Main.fg_1_2,4);
+	var this1 = hxd_Res.get_loader();
+	Main.fg_2_1 = new h2d_Bitmap(this1.loadCache("bg/fg2.png",hxd_res_Image).toTile());
+	var this1 = hxd_Res.get_loader();
+	Main.fg_2_2 = new h2d_Bitmap(this1.loadCache("bg/fg2.png",hxd_res_Image).toTile());
+	var _this = Main.fg_2_2;
+	_this.posChanged = true;
+	_this.x = 240;
+	Main.layers.addChildAt(Main.fg_2_1,2);
+	Main.layers.addChildAt(Main.fg_2_2,2);
+	var _this = Main.layers;
+	var this1 = hxd_Res.get_loader();
+	_this.addChildAt(new h2d_Bitmap(this1.loadCache("bg/sky.png",hxd_res_Image).toTile()),0);
+	var this1 = hxd_Res.get_loader();
+	Main.bg_1_1 = new h2d_Bitmap(this1.loadCache("bg/bg1.png",hxd_res_Image).toTile());
+	var this1 = hxd_Res.get_loader();
+	Main.bg_1_2 = new h2d_Bitmap(this1.loadCache("bg/bg1.png",hxd_res_Image).toTile());
+	var _this = Main.bg_1_2;
+	_this.posChanged = true;
+	_this.x = 240;
+	Main.layers.addChildAt(Main.bg_1_1,0);
+	Main.layers.addChildAt(Main.bg_1_2,0);
+	var this1 = hxd_Res.get_loader();
+	Main.bg_2_1 = new h2d_Bitmap(this1.loadCache("bg/bg2.png",hxd_res_Image).toTile());
+	var this1 = hxd_Res.get_loader();
+	Main.bg_2_2 = new h2d_Bitmap(this1.loadCache("bg/bg2.png",hxd_res_Image).toTile());
+	var _this = Main.bg_2_2;
+	_this.posChanged = true;
+	_this.x = 240;
+	Main.layers.addChildAt(Main.bg_2_1,1);
+	Main.layers.addChildAt(Main.bg_2_2,1);
+};
+Main.update_parallex_fg_1 = function(dt) {
+	var fh = Main.fg_1_1;
+	fh.posChanged = true;
+	fh.x -= dt * Main.fg_1_speed;
+	var fh = Main.fg_1_2;
+	fh.posChanged = true;
+	fh.x -= dt * Main.fg_1_speed;
+	if(Main.fg_1_1.x <= -240) {
+		var fh = Main.fg_1_1;
+		fh.posChanged = true;
+		fh.x += 480;
+	}
+	if(Main.fg_1_2.x <= -240) {
+		var fh = Main.fg_1_2;
+		fh.posChanged = true;
+		fh.x += 480;
+	}
+};
+Main.update_parallex_fg_2 = function(dt) {
+	var fh = Main.fg_2_1;
+	fh.posChanged = true;
+	fh.x -= dt * Main.fg_2_speed;
+	var fh = Main.fg_2_2;
+	fh.posChanged = true;
+	fh.x -= dt * Main.fg_2_speed;
+	if(Main.fg_2_1.x <= -240) {
+		var fh = Main.fg_2_1;
+		fh.posChanged = true;
+		fh.x += 480;
+	}
+	if(Main.fg_2_2.x <= -240) {
+		var fh = Main.fg_2_2;
+		fh.posChanged = true;
+		fh.x += 480;
+	}
+};
+Main.update_parallex_bg_1 = function(dt) {
+	var fh = Main.bg_1_1;
+	fh.posChanged = true;
+	fh.x -= dt * Main.bg_1_speed;
+	var fh = Main.bg_1_2;
+	fh.posChanged = true;
+	fh.x -= dt * Main.bg_1_speed;
+	if(Main.bg_1_1.x <= -240) {
+		var fh = Main.bg_1_1;
+		fh.posChanged = true;
+		fh.x += 480;
+	}
+	if(Main.bg_1_2.x <= -240) {
+		var fh = Main.bg_1_2;
+		fh.posChanged = true;
+		fh.x += 480;
+	}
+};
+Main.update_parallex_bg_2 = function(dt) {
+	var fh = Main.bg_2_1;
+	fh.posChanged = true;
+	fh.x -= dt * Main.bg_2_speed;
+	var fh = Main.bg_2_2;
+	fh.posChanged = true;
+	fh.x -= dt * Main.bg_2_speed;
+	if(Main.bg_2_1.x <= -240) {
+		var fh = Main.bg_2_1;
+		fh.posChanged = true;
+		fh.x += 480;
+	}
+	if(Main.bg_2_2.x <= -240) {
+		var fh = Main.bg_2_2;
+		fh.posChanged = true;
+		fh.x += 480;
+	}
+};
+Main.update_player_jump = function(dt) {
+	if(!Main.player.inAir) {
+		return;
+	}
+	var fh = Main.player;
+	fh.posChanged = true;
+	fh.y += Main.player.velocity * dt;
+	Main.player.velocity += 190 * dt;
+	if(Main.player.y >= 105) {
+		var _this = Main.player;
+		_this.posChanged = true;
+		_this.y = 105;
+		Main.player.inAir = false;
+		Main.player.velocity = 0;
+		Main.player.do_run();
+	}
+};
+Main.spawn_enemy = function() {
+	Main.enemy = new Enemy();
+	var _this = Main.enemy;
+	_this.posChanged = true;
+	_this.x = 270;
+	var _this = Main.enemy;
+	_this.posChanged = true;
+	_this.y = 105;
+	var _this = Main.enemy;
+	_this.posChanged = true;
+	_this.scaleX = -1;
+	Main.layers.addChildAt(Main.enemy,3);
+};
+Main.update_enemy = function(dt) {
+	if(Main.enemy == null) {
+		return;
+	}
+	if(Main.enemy.x < -10) {
+		Main.layers.removeChild(Main.enemy);
+		Main.enemy = null;
+	}
+	var fh = Main.enemy;
+	fh.posChanged = true;
+	fh.x -= Main.fg_2_speed * dt * 2;
+};
+Main.spawn_random_enemy = function() {
+	if(Main.enemy != null) {
+		return;
+	}
+	if(Math.random() < 0.1) {
+		Main.spawn_enemy();
+	}
+};
+Main.main = function() {
+	hxd_Res.set_loader(new hxd_res_Loader(new hxd_fs_EmbedFileSystem(haxe_Unserializer.run("oy2:tvoy7:et4.pngty7:rtj.pngty7:rt3.pngty7:et3.pngty7:rt4.pngty7:et2.pngty7:rt2.pngty7:rt1.pngty7:et1.pngtgy2:bgoy7:fg1.pngty7:bg2.pngty7:bg1.pngty7:fg2.pngty7:sky.pngtgg"))));
+	new Main();
+};
+Main.__super__ = hxd_App;
+Main.prototype = $extend(hxd_App.prototype,{
+	init: function() {
+		hxd_App.prototype.init.call(this);
+		this.s2d.set_scaleMode(h2d_ScaleMode.LetterBox(240,135));
+		var this1 = hxd_Res.get_loader();
+		var tmp = this1.loadCache("tv/rt1.png",hxd_res_Image).toTile();
+		var this1 = hxd_Res.get_loader();
+		var tmp1 = this1.loadCache("tv/rt2.png",hxd_res_Image).toTile();
+		var this1 = hxd_Res.get_loader();
+		var tmp2 = this1.loadCache("tv/rt3.png",hxd_res_Image).toTile();
+		var this1 = hxd_Res.get_loader();
+		Player.run = [tmp,tmp1,tmp2,this1.loadCache("tv/rt4.png",hxd_res_Image).toTile()];
+		var this1 = hxd_Res.get_loader();
+		var tmp = this1.loadCache("tv/et1.png",hxd_res_Image).toTile();
+		var this1 = hxd_Res.get_loader();
+		var tmp1 = this1.loadCache("tv/et2.png",hxd_res_Image).toTile();
+		var this1 = hxd_Res.get_loader();
+		var tmp2 = this1.loadCache("tv/et3.png",hxd_res_Image).toTile();
+		var this1 = hxd_Res.get_loader();
+		Enemy.run = [tmp,tmp1,tmp2,this1.loadCache("tv/et4.png",hxd_res_Image).toTile()];
+		Main.layers = new h2d_Layers(this.s2d);
+		Main.init_background();
+		hxd_Window.getInstance().addEventTarget(Main.onSpaceJump);
+		Main.player = new Player();
+		var _this = Main.player;
+		_this.posChanged = true;
+		_this.x = 28;
+		var _this = Main.player;
+		_this.posChanged = true;
+		_this.y = 105;
+		Main.layers.addChildAt(Main.player,3);
+	}
+	,update: function(dt) {
+		Main.update_parallex_fg_1(dt);
+		Main.update_parallex_fg_2(dt);
+		Main.update_parallex_bg_1(dt);
+		Main.update_parallex_bg_2(dt);
+		Main.update_player_jump(dt);
+		Main.update_enemy(dt);
+		Main.spawn_random_enemy();
+	}
+	,__class__: Main
+});
+Math.__name__ = "Math";
 var Player = function(parent) {
 	this.velocity = 0;
 	this.inAir = false;
@@ -21498,6 +21556,19 @@ var h3d_impl_RenderFlag = $hxEnums["h3d.impl.RenderFlag"] = { __ename__:true,__c
 };
 h3d_impl_RenderFlag.__constructs__ = [h3d_impl_RenderFlag.CameraHandness];
 h3d_impl_RenderFlag.__empty_constructs__ = [h3d_impl_RenderFlag.CameraHandness];
+var haxe_IMap = function() { };
+$hxClasses["haxe.IMap"] = haxe_IMap;
+haxe_IMap.__name__ = "haxe.IMap";
+haxe_IMap.__isInterface__ = true;
+var haxe_ds_StringMap = function() {
+	this.h = Object.create(null);
+};
+$hxClasses["haxe.ds.StringMap"] = haxe_ds_StringMap;
+haxe_ds_StringMap.__name__ = "haxe.ds.StringMap";
+haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
+haxe_ds_StringMap.prototype = {
+	__class__: haxe_ds_StringMap
+};
 var h3d_impl_InputNames = function(names) {
 	this.id = h3d_impl_InputNames.UID++;
 	this.names = names;
@@ -25261,6 +25332,35 @@ h3d_mat_Stencil.prototype = {
 		this.set_reference(this.maskBits >> 16 & 255);
 	}
 	,__class__: h3d_mat_Stencil
+};
+var haxe_ds_IntMap = function() {
+	this.h = { };
+};
+$hxClasses["haxe.ds.IntMap"] = haxe_ds_IntMap;
+haxe_ds_IntMap.__name__ = "haxe.ds.IntMap";
+haxe_ds_IntMap.__interfaces__ = [haxe_IMap];
+haxe_ds_IntMap.prototype = {
+	remove: function(key) {
+		if(!this.h.hasOwnProperty(key)) {
+			return false;
+		}
+		delete(this.h[key]);
+		return true;
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h ) if(this.h.hasOwnProperty(key)) a.push(+key);
+		return new haxe_iterators_ArrayIterator(a);
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref[i];
+		}};
+	}
+	,__class__: haxe_ds_IntMap
 };
 var hxd_PixelFormat = $hxEnums["hxd.PixelFormat"] = { __ename__:true,__constructs__:null
 	,ARGB: {_hx_name:"ARGB",_hx_index:0,__enum__:"hxd.PixelFormat",toString:$estr}
@@ -37590,10 +37690,6 @@ h3d_shader_VolumeDecal.prototype = $extend(hxsl_Shader.prototype,{
 	}
 	,__class__: h3d_shader_VolumeDecal
 });
-var haxe_IMap = function() { };
-$hxClasses["haxe.IMap"] = haxe_IMap;
-haxe_IMap.__name__ = "haxe.IMap";
-haxe_IMap.__isInterface__ = true;
 var haxe_EntryPoint = function() { };
 $hxClasses["haxe.EntryPoint"] = haxe_EntryPoint;
 haxe_EntryPoint.__name__ = "haxe.EntryPoint";
@@ -39022,35 +39118,6 @@ haxe_ds_EnumValueMap.prototype = $extend(haxe_ds_BalancedTree.prototype,{
 	}
 	,__class__: haxe_ds_EnumValueMap
 });
-var haxe_ds_IntMap = function() {
-	this.h = { };
-};
-$hxClasses["haxe.ds.IntMap"] = haxe_ds_IntMap;
-haxe_ds_IntMap.__name__ = "haxe.ds.IntMap";
-haxe_ds_IntMap.__interfaces__ = [haxe_IMap];
-haxe_ds_IntMap.prototype = {
-	remove: function(key) {
-		if(!this.h.hasOwnProperty(key)) {
-			return false;
-		}
-		delete(this.h[key]);
-		return true;
-	}
-	,keys: function() {
-		var a = [];
-		for( var key in this.h ) if(this.h.hasOwnProperty(key)) a.push(+key);
-		return new haxe_iterators_ArrayIterator(a);
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref[i];
-		}};
-	}
-	,__class__: haxe_ds_IntMap
-};
 var haxe_ds_List = function() {
 	this.length = 0;
 };
@@ -39141,15 +39208,6 @@ haxe_ds_ObjectMap.prototype = {
 		return new haxe_iterators_ArrayIterator(a);
 	}
 	,__class__: haxe_ds_ObjectMap
-};
-var haxe_ds_StringMap = function() {
-	this.h = Object.create(null);
-};
-$hxClasses["haxe.ds.StringMap"] = haxe_ds_StringMap;
-haxe_ds_StringMap.__name__ = "haxe.ds.StringMap";
-haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
-haxe_ds_StringMap.prototype = {
-	__class__: haxe_ds_StringMap
 };
 var haxe_ds_Vector = {};
 haxe_ds_Vector.blit = function(src,srcPos,dest,destPos,len) {

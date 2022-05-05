@@ -25,6 +25,13 @@ class Main extends hxd.App {
 			hxd.Res.tv.rt3.toTile(),
 			hxd.Res.tv.rt4.toTile()
 		];
+
+        Enemy.run = [
+			hxd.Res.tv.et1.toTile(),
+			hxd.Res.tv.et2.toTile(),
+			hxd.Res.tv.et3.toTile(),
+			hxd.Res.tv.et4.toTile()
+		];
 		layers = new Layers(s2d);
 		init_background();
 
@@ -139,12 +146,41 @@ class Main extends hxd.App {
             return;
 
         player.y += player.velocity * dt;
-        player.velocity += 160*dt;
+        player.velocity += 190*dt;
         if(player.y>=105) {
             player.y = 105;
             player.inAir = false;
             player.velocity = 0;
             player.do_run();
+        }
+    }
+
+    static var enemy : Enemy = null;
+    static function spawn_enemy() {
+        enemy = new Enemy();
+        enemy.x = 270;
+		enemy.y = 105;
+        enemy.scaleX = -1;
+		layers.add(enemy, 3);
+    }
+
+    static function update_enemy(dt:Float) {
+        if(enemy == null)
+            return;
+
+        if(enemy.x < -10) {
+            layers.removeChild(enemy);
+            enemy = null;
+        }
+
+        enemy.x -= fg_2_speed*dt*2;
+    }
+
+    static function spawn_random_enemy() {
+        if(enemy != null)
+            return;
+        if(Math.random() < 0.1) {
+            spawn_enemy();
         }
     }
 
@@ -154,6 +190,8 @@ class Main extends hxd.App {
 		update_parallex_bg_1(dt);
 		update_parallex_bg_2(dt);
         update_player_jump(dt);
+        update_enemy(dt);
+        spawn_random_enemy();
 	}
 
 	static function main() {
