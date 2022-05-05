@@ -1290,6 +1290,17 @@ Lambda.array = function(it) {
 	}
 	return a;
 };
+var Rectangle = function() {
+	this.h = 0;
+	this.w = 0;
+	this.y = 0;
+	this.x = 0;
+};
+$hxClasses["Rectangle"] = Rectangle;
+Rectangle.__name__ = "Rectangle";
+Rectangle.prototype = {
+	__class__: Rectangle
+};
 var h3d_IDrawable = function() { };
 $hxClasses["h3d.IDrawable"] = h3d_IDrawable;
 h3d_IDrawable.__name__ = "h3d.IDrawable";
@@ -1631,6 +1642,7 @@ Main.update_enemy = function(dt) {
 	if(Main.enemy.x < -10) {
 		Main.layers.removeChild(Main.enemy);
 		Main.enemy = null;
+		return;
 	}
 	var fh = Main.enemy;
 	fh.posChanged = true;
@@ -1642,6 +1654,29 @@ Main.spawn_random_enemy = function() {
 	}
 	if(Math.random() < 0.1) {
 		Main.spawn_enemy();
+	}
+};
+Main.check_collision = function() {
+	if(Main.enemy == null) {
+		return;
+	}
+	Main.player_col.x = Main.player.x + 10;
+	Main.player_col.y = Main.player.y + 10;
+	Main.player_col.w = 10;
+	Main.player_col.h = 10;
+	Main.enemy_col.x = Main.enemy.x + 10 - 24;
+	Main.enemy_col.y = Main.enemy.y + 10;
+	Main.enemy_col.w = 10;
+	Main.enemy_col.h = 10;
+	if(Main.do_overlap(Main.player_col,Main.enemy_col)) {
+		haxe_Log.trace("overlap",{ fileName : "src/Main.hx", lineNumber : 215, className : "Main", methodName : "check_collision"});
+	}
+};
+Main.do_overlap = function(rect1,rect2) {
+	if(rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h) {
+		return rect1.h + rect1.y > rect2.y;
+	} else {
+		return false;
 	}
 };
 Main.main = function() {
@@ -1689,6 +1724,7 @@ Main.prototype = $extend(hxd_App.prototype,{
 		Main.update_player_jump(dt);
 		Main.update_enemy(dt);
 		Main.spawn_random_enemy();
+		Main.check_collision();
 	}
 	,__class__: Main
 });
@@ -67180,6 +67216,8 @@ Main.fg_1_speed = 50;
 Main.fg_2_speed = 30;
 Main.bg_1_speed = 5;
 Main.bg_2_speed = 10;
+Main.player_col = new Rectangle();
+Main.enemy_col = new Rectangle();
 format_gif_Tools.LN2 = Math.log(2);
 format_mp3_MPEG.V1 = 3;
 format_mp3_MPEG.V2 = 2;

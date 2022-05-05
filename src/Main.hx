@@ -1,10 +1,21 @@
 package;
 
+import h2d.col.Point;
 import hxd.Key;
 import hxd.Window;
 import h2d.Bitmap;
 import h2d.Layers;
 import hxd.App;
+
+class Rectangle {
+	public var x : Float = 0;
+	public var y : Float = 0;
+	public var w : Float = 0;
+	public var h : Float = 0;
+	public function new() {
+		
+	}
+}
 
 class Main extends hxd.App {
 	static var fg_1_speed:Float = 50;
@@ -171,6 +182,7 @@ class Main extends hxd.App {
         if(enemy.x < -10) {
             layers.removeChild(enemy);
             enemy = null;
+            return;
         }
 
         enemy.x -= fg_2_speed*dt*2;
@@ -184,6 +196,33 @@ class Main extends hxd.App {
         }
     }
 
+    static var player_col : Rectangle = new Rectangle();
+    static var enemy_col : Rectangle = new Rectangle();
+
+    static function check_collision() {
+        if(enemy == null)
+            return;
+        player_col.x = player.x+10;
+		player_col.y = player.y+10;
+		player_col.w = 10;
+		player_col.h = 10;
+        
+        enemy_col.x = enemy.x+10-24;
+        enemy_col.y = enemy.y+10;
+		enemy_col.w = 10;
+		enemy_col.h = 10;
+        if( do_overlap(player_col, enemy_col) ) {
+            trace("overlap");
+        }
+    }
+
+    static function do_overlap(rect1:Rectangle, rect2:Rectangle):Bool {
+        return rect1.x < rect2.x + rect2.w &&
+        rect1.x + rect1.w > rect2.x &&
+        rect1.y < rect2.y + rect2.h &&
+        rect1.h + rect1.y > rect2.y;
+    }
+
 	override function update(dt:Float) {
 		update_parallex_fg_1(dt);
 		update_parallex_fg_2(dt);
@@ -192,6 +231,7 @@ class Main extends hxd.App {
         update_player_jump(dt);
         update_enemy(dt);
         spawn_random_enemy();
+        check_collision();
 	}
 
 	static function main() {
